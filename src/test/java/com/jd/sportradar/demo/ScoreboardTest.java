@@ -57,8 +57,8 @@ public class ScoreboardTest {
   public void should_ReturnIdenticalScoreboard_When_AlreadyFinishedMatchRemoved_Test() {
     scoreboardProvider();
     List<Match> preScoreboardContent = scoreboard.getContent();
-    List<Match> extendedScoreboardContent = null;
-    List<Match> scoreboardContent = null;
+    List<Match> extendedScoreboardContent;
+    List<Match> scoreboardContent;
 
     // adding a new match
     Match match = scoreboard.startMatch(Team.POLAND_NATIONAL, Team.SLOVENIA_NATIONAL);
@@ -133,7 +133,7 @@ public class ScoreboardTest {
   public void should_ReturnAnUpdatedScoreboard_When_MatchIsFinished_Test() {
     scoreboardProvider();
     List<Match> preScoreboardContent = scoreboard.getContent();
-    List<Match> shrunkScoreboardContent = null;
+    List<Match> shrunkScoreboardContent;
 
     // finishing an existing match, it should be the MEXICO match
     assertTrue(scoreboard.finishMatch(scoreboard.getContent().get(0)));
@@ -153,7 +153,7 @@ public class ScoreboardTest {
   public void should_ReturnAnUpdatedScoreboard_When_MatchIsUpdated_Test() {
     scoreboardProvider();
     List<Match> preScoreboardContent = scoreboard.getContent();
-    List<Match> updatedScoreboardContent = null;
+    List<Match> updatedScoreboardContent;
 
     // element of index 5 should be the Argentina-Australia match
     Match match = preScoreboardContent.get(4);
@@ -192,7 +192,7 @@ public class ScoreboardTest {
   public void should_ReturnAnUpdatedScoreboard_When_MatchesAreAddedUpdatedAndFinished_Test() {
     scoreboardProvider();
     List<Match> preScoreboardContent = scoreboard.getContent();
-    List<Match> updatedScoreboardContent = null;
+    List<Match> updatedScoreboardContent;
 
     Match argentinaMatch = preScoreboardContent.get(4);
     Match mexicoMatch = preScoreboardContent.get(0);
