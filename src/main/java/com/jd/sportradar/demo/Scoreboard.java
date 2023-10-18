@@ -2,30 +2,52 @@ package com.jd.sportradar.demo;
 
 import java.util.*;
 
+import static com.jd.sportradar.demo.Match.createMatch;
+
 public final class Scoreboard {
 
   Set<Match> scoreboardContent;
-  Comparator<Match> comparator = Comparator.comparingInt(Match::hashCode);
+  Comparator<Match> comparator =
+      Comparator.comparing(Match::getHomeTeam).thenComparing(Match::getAwayTeam);
 
   public Scoreboard() {
     scoreboardContent = new TreeSet<>(comparator);
   }
 
   public Match updateMatch(Match match) {
-    if (null == match) return null;
-    return null;
+    if (findAndRemove(match)) {
+      Match newMatch = Match.createMatchFrom(match);
+      scoreboardContent.add(newMatch);
+      return newMatch;
+    } else {
+      return null;
+    }
   }
 
   public Match startMatch(Team homeTeam, Team awayTeam) {
-    return null;
+    if (homeTeam == null || awayTeam == null) return null;
+    Match match = createMatch(homeTeam, awayTeam);
+    return scoreboardContent.add(match) ? match : null;
+  }
+
+  private boolean findAndRemove(Match match) {
+    if (null == match) return false;
+    return scoreboardContent.remove(match);
   }
 
   public boolean finishMatch(Match match) {
-    return false;
+    return findAndRemove(match);
   }
 
-  public ArrayList<Match> getContent() {
-    return new ArrayList<>();
+  public List<Match> getContent() {
+    return scoreboardContent.stream()
+        .sorted(
+            Comparator.comparing(Match::getScoreSum)
+                .thenComparing(Match::getArrivalIndex)
+                .reversed()
+                .thenComparing(Match::getHomeTeam)
+                .thenComparing(Match::getAwayTeam))
+        .toList();
   }
 
   public void cleanUp() {
