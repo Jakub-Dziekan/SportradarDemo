@@ -2,10 +2,11 @@ package com.jd.sportradar.demo;
 
 import lombok.Getter;
 
+@Getter
 public final class Score {
 
-  @Getter private final int homeScore;
-  @Getter private final int awayScore;
+  private final int homeScore;
+  private final int awayScore;
 
   public Score(int homeScore, int awayScore) {
     this.homeScore = homeScore;

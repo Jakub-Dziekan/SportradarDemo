@@ -103,7 +103,7 @@ public class ScoreboardTest {
       String homeTeam, String awayTeam) {
     scoreboardProvider();
     List<Match> preScoreboardContent = scoreboard.getContent();
-    List<Match> extendedScoreboardContent = null;
+    List<Match> extendedScoreboardContent;
 
     // adding a new match
     Match match = scoreboard.startMatch(Team.valueOf(homeTeam), Team.valueOf(awayTeam));
@@ -247,7 +247,7 @@ public class ScoreboardTest {
   }
 
   // A couple of teams to repetitively test uniqueness assumptions (see documentation)
-  public Stream<Arguments> teamsProvider() {
+  static Stream<Arguments> teamsProvider() {
     return Stream.of(
         Arguments.of("ITALY_NATIONAL", "SPAIN_NATIONAL"),
         Arguments.of("SLOVENIA_NATIONAL", "POLAND_NATIONAL"),

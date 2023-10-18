@@ -18,6 +18,6 @@ public enum Team {
   URUGUAY_NATIONAL(TeamCategories.NATIONAL_FOOTBALL_MEN_ELITE, "Uruguay"),
   USA_NATIONAL(TeamCategories.NATIONAL_FOOTBALL_MEN_ELITE, "USA"),
   CAMEROON_NATIONAL(TeamCategories.NATIONAL_FOOTBALL_MEN_ELITE, "Cameroon");
-  private TeamCategories category;
-  private String name;
+  private final TeamCategories category;
+  private final String name;
 }
