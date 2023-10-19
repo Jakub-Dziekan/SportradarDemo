@@ -2,8 +2,6 @@ package com.jd.sportradar.demo;
 
 import java.util.List;
 
-import static com.jd.sportradar.demo.Match.createMatch;
-
 public interface Scoreboard {
 
   Match updateMatch(Match match);
