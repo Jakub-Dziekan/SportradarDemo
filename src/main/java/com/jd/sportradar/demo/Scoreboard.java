@@ -6,13 +6,13 @@ import static com.jd.sportradar.demo.Match.createMatch;
 
 public interface Scoreboard {
 
-    public Match updateMatch(Match match);
+  Match updateMatch(Match match);
 
-    public Match startMatch(Team homeTeam, Team awayTeam);
+  Match startMatch(Team homeTeam, Team awayTeam);
 
-    public boolean finishMatch(Match match);
+  boolean finishMatch(Match match);
 
-    public List<Match> getContent();
+  List<Match> getContent();
 
-    public void cleanUp();
+  void cleanUp();
 }
