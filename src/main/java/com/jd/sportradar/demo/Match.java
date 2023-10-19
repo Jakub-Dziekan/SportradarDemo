@@ -4,27 +4,40 @@ import java.math.BigInteger;
 import lombok.Getter;
 
 @Getter
-public final class Match {
+public final class Match extends Event {
   private final Team homeTeam;
   private final Team awayTeam;
   private final Score score;
-  private static BigInteger arrivalIndexSequence = BigInteger.ZERO;
-  private final BigInteger arrivalIndex;
 
-  private Match(
-      Team homeTeam, Team awayTeam, int homeScore, int awayScore, BigInteger arrivalIndex) {
+  private Match(Team homeTeam, Team awayTeam, int homeScore, int awayScore) {
+    super();
     this.homeTeam = homeTeam;
     this.awayTeam = awayTeam;
     this.score = new Score(homeScore, awayScore);
-    this.arrivalIndex = arrivalIndex;
+  }
+
+  private Match(
+      Team homeTeam, Team awayTeam, int homeScore, int awayScore, BigInteger arrivalIndex) {
+    super(arrivalIndex);
+    this.homeTeam = homeTeam;
+    this.awayTeam = awayTeam;
+    this.score = new Score(homeScore, awayScore);
   }
 
   static Match createMatch(Team homeTeam, Team awayTeam) {
-    arrivalIndexSequence = arrivalIndexSequence.add(BigInteger.ONE);
-    return createMatch(homeTeam, awayTeam, 0, 0, arrivalIndexSequence);
+    return createMatch(homeTeam, awayTeam, 0, 0);
   }
 
-  static Match createMatch(
+  // creator for new objects (new Event -> arrivalIndex to be set)
+  static Match createMatch(Team homeTeam, Team awayTeam, int homeScore, int awayScore) {
+    if (homeTeam == null || awayTeam == null) {
+      return null;
+    }
+    return new Match(homeTeam, awayTeam, homeScore, awayScore);
+  }
+
+  // copying creator for existing objects (arrivalIndex already known)
+  static Match copyMatch(
       Team homeTeam, Team awayTeam, int homeScore, int awayScore, BigInteger arrivalIndex) {
     if (homeTeam == null || awayTeam == null) {
       return null;
@@ -32,8 +45,8 @@ public final class Match {
     return new Match(homeTeam, awayTeam, homeScore, awayScore, arrivalIndex);
   }
 
-  static Match createMatchFrom(Match match) {
-    return new Match(
+  static Match copyMatchFrom(Match match) {
+    return copyMatch(
         match.homeTeam,
         match.awayTeam,
         match.getScore().getHomeScore(),
@@ -45,7 +58,7 @@ public final class Match {
   // NOTE: the arrival index is being copied, meaning that update is not changing the ordering in
   // the scoreboard
   public Match updateScore(int homeScore, int awayScore) {
-    return createMatch(this.homeTeam, this.awayTeam, homeScore, awayScore, this.arrivalIndex);
+    return copyMatch(this.homeTeam, this.awayTeam, homeScore, awayScore, this.getArrivalIndex());
   }
 
   public int getScoreSum() {

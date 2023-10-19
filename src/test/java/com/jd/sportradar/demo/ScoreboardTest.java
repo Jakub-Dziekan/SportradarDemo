@@ -21,7 +21,7 @@ public class ScoreboardTest {
 
   @BeforeEach
   void init() {
-    scoreboard = new Scoreboard();
+    scoreboard = new ScoreboardImpl();
   }
 
   @Test
