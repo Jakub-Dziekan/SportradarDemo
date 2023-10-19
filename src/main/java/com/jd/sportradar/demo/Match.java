@@ -45,15 +45,6 @@ public final class Match extends Event {
     return new Match(homeTeam, awayTeam, homeScore, awayScore, arrivalIndex);
   }
 
-  static Match copyMatchFrom(Match match) {
-    return copyMatch(
-        match.homeTeam,
-        match.awayTeam,
-        match.getScore().getHomeScore(),
-        match.getScore().getAwayScore(),
-        match.getArrivalIndex());
-  }
-
   // This method is updating the score by creating the new match with old values and new score
   // NOTE: the arrival index is being copied, meaning that update is not changing the ordering in
   // the scoreboard

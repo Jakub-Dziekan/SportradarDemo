@@ -6,6 +6,7 @@ import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
 
+import java.math.BigInteger;
 import java.util.List;
 import java.util.Optional;
 import java.util.logging.Logger;
@@ -205,6 +206,14 @@ public class ScoreboardTest {
   }
 
   @Test
+  public void should_ReturnNull_When_MatchHasIncorrectTeams_Test() {
+    // technically this shouldn't be used, but is made available, so is being tested
+    assertNull(Match.copyMatch(null, null, 1, 1, BigInteger.ZERO));
+    assertNull(Match.copyMatch(null, Team.ARGENTINA_NATIONAL, 0, 1, BigInteger.ZERO));
+    assertNull(Match.copyMatch(Team.ARGENTINA_NATIONAL, null, 1, 0, BigInteger.ZERO));
+  }
+
+  @Test
   public void should_ReturnAnUpdatedScoreboard_When_MatchIsUpdated_Test() {
     List<Match> preScoreboardContent = scoreboardProvider();
     List<Match> updatedScoreboardContent;
@@ -356,7 +365,8 @@ public class ScoreboardTest {
 
     // updates will be shuffled a bit to test if time of update affects the result
     scoreboard.updateMatch(Optional.of(germanyMatch.updateScore(2, 2)).orElse(mockMatchProvider()));
-    scoreboard.updateMatch(Optional.of(argentinaMatch.updateScore(3, 1)).orElse(mockMatchProvider()));
+    scoreboard.updateMatch(
+        Optional.of(argentinaMatch.updateScore(3, 1)).orElse(mockMatchProvider()));
     scoreboard.updateMatch(Optional.of(mexicoMatch.updateScore(0, 5)).orElse(mockMatchProvider()));
     scoreboard.updateMatch(Optional.of(uruguayMatch.updateScore(6, 6)).orElse(mockMatchProvider()));
     scoreboard.updateMatch(Optional.of(spainMatch.updateScore(10, 2)).orElse(mockMatchProvider()));

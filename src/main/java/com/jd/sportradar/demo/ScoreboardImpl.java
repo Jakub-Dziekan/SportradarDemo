@@ -24,11 +24,14 @@ public final class ScoreboardImpl implements Scoreboard {
     sortedOutput = new ArrayList<>();
   }
 
+  // We're going to look for any instance of the match (could be a different one with the same
+  // teams!) remove it and then add the passed instance.
+  // It is technically possible (even though unlikely) that the new instance will be exactly the
+  // same as the original one
   @Override
   public Match updateMatch(Match match) {
     if (findAndRemove(match, false)) {
-      Match newMatch = Match.copyMatchFrom(match);
-      return updateScoreboard(newMatch, true, m -> scoreboardContent.add(m)) ? newMatch : null;
+      return updateScoreboard(match, true, m -> scoreboardContent.add(m)) ? match : null;
     } else {
       return null;
     }
