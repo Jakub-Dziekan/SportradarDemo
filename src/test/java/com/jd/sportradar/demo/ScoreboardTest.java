@@ -8,6 +8,7 @@ import org.junit.jupiter.params.provider.MethodSource;
 
 import java.util.List;
 import java.util.Optional;
+import java.util.logging.Logger;
 import java.util.stream.Stream;
 
 import static org.junit.jupiter.api.Assertions.*;
@@ -15,6 +16,8 @@ import static org.junit.jupiter.api.Assertions.*;
 public class ScoreboardTest {
 
   private Scoreboard scoreboard;
+
+  Logger log = Logger.getLogger(ScoreboardTest.class.getName());
 
   @BeforeEach
   void init() {
@@ -212,7 +215,7 @@ public class ScoreboardTest {
     assertEquals(Team.MEXICO_NATIONAL, match.getHomeTeam());
     assertEquals(Team.CANADA_NATIONAL, match.getAwayTeam());
     Match updatedMatch =
-        scoreboard.updateMatch(match.updateScore(3, 1).orElse(mockMatchProvider()));
+        scoreboard.updateMatch(Optional.of(match.updateScore(3, 1)).orElse(mockMatchProvider()));
     assertNotNull(updatedMatch);
     assertEquals(match.getHomeTeam(), updatedMatch.getHomeTeam());
     assertEquals(match.getAwayTeam(), updatedMatch.getAwayTeam());
@@ -237,6 +240,8 @@ public class ScoreboardTest {
     assertEquals(Team.URUGUAY_NATIONAL, updatedScoreboardContent.get(2).getHomeTeam());
     assertEquals(Team.GERMANY_NATIONAL, updatedScoreboardContent.get(3).getHomeTeam());
     assertEquals(Team.SPAIN_NATIONAL, updatedScoreboardContent.get(4).getHomeTeam());
+
+    logScoreboard(getCallerMethodName());
   }
 
   // a similar case to the above UPDATE one, but more complex
@@ -246,7 +251,7 @@ public class ScoreboardTest {
     List<Match> preScoreboardContent = scoreboardProvider();
     List<Match> updatedScoreboardContent;
 
-    //updating scores
+    // updating scores
     updatedScoreboardContent = scoreboardWithUpdatesProvider(preScoreboardContent);
     assertNotNull(updatedScoreboardContent, "The scoreboard was null");
     assertEquals(preScoreboardContent.size(), updatedScoreboardContent.size());
@@ -266,13 +271,15 @@ public class ScoreboardTest {
 
     assertEquals(Team.GERMANY_NATIONAL, updatedScoreboardContent.get(4).getHomeTeam());
     assertEquals(2, updatedScoreboardContent.get(4).getScore().getAwayScore());
+
+    logScoreboard(getCallerMethodName());
   }
 
   // a similar case to the above ones, but everything combined
   // (we've already proven above that it works separately, so we'll only check the result)
   @Test
   public void should_ReturnAnUpdatedScoreboard_When_MatchesAreAddedUpdatedAndFinished_Test() {
-    //adding matches and updating scores as above
+    // adding matches and updating scores as above
     List<Match> updatedScoreboardContent = scoreboardWithUpdatesProvider(scoreboardProvider());
 
     // let's now finish two games and add two more, the USA-CMR one will have equal goals count as
@@ -283,10 +290,10 @@ public class ScoreboardTest {
     assertTrue(scoreboard.finishMatch(spainMatch));
     Match newMatch = scoreboard.startMatch(Team.POLAND_NATIONAL, Team.SLOVENIA_NATIONAL);
     assertNotNull(newMatch);
-    scoreboard.updateMatch(newMatch.updateScore(7, 6).orElse(mockMatchProvider()));
+    scoreboard.updateMatch(Optional.of(newMatch.updateScore(7, 6)).orElse(mockMatchProvider()));
     newMatch = scoreboard.startMatch(Team.CAMEROON_NATIONAL, Team.USA_NATIONAL);
     assertNotNull(newMatch);
-    scoreboard.updateMatch(newMatch.updateScore(3, 2).orElse(mockMatchProvider()));
+    scoreboard.updateMatch(Optional.of(newMatch.updateScore(3, 2)).orElse(mockMatchProvider()));
 
     // since the new match is now the highest scoring game, it should be first
     // expected order: POL-SLO 7:6; URU-ITA 6:6; CMR-USA 3:2; MEX-CAN 0:5; GER-FRA 2:2;
@@ -296,6 +303,8 @@ public class ScoreboardTest {
     assertEquals(6, updatedScoreboardContent.get(0).getScore().getAwayScore());
     assertEquals(Team.CAMEROON_NATIONAL, updatedScoreboardContent.get(2).getHomeTeam());
     assertEquals(2, updatedScoreboardContent.get(2).getScore().getAwayScore());
+
+    logScoreboard(getCallerMethodName());
   }
 
   // A couple of teams to repetitively test uniqueness assumptions (see documentation)
@@ -323,11 +332,21 @@ public class ScoreboardTest {
   }
 
   private List<Match> scoreboardWithUpdatesProvider(List<Match> preScoreboardContent) {
-    Match argentinaMatch = getSpecificMatch(Team.ARGENTINA_NATIONAL, Team.AUSTRALIA_NATIONAL, preScoreboardContent).orElse(mockMatchProvider());
-    Match uruguayMatch = getSpecificMatch(Team.URUGUAY_NATIONAL, Team.ITALY_NATIONAL, preScoreboardContent).orElse(mockMatchProvider());
-    Match germanyMatch = getSpecificMatch(Team.GERMANY_NATIONAL, Team.FRANCE_NATIONAL, preScoreboardContent).orElse(mockMatchProvider());
-    Match spainMatch = getSpecificMatch(Team.SPAIN_NATIONAL, Team.BRAZIL_NATIONAL, preScoreboardContent).orElse(mockMatchProvider());
-    Match mexicoMatch = getSpecificMatch(Team.MEXICO_NATIONAL, Team.CANADA_NATIONAL, preScoreboardContent).orElse(mockMatchProvider());
+    Match argentinaMatch =
+        getSpecificMatch(Team.ARGENTINA_NATIONAL, Team.AUSTRALIA_NATIONAL, preScoreboardContent)
+            .orElse(mockMatchProvider());
+    Match uruguayMatch =
+        getSpecificMatch(Team.URUGUAY_NATIONAL, Team.ITALY_NATIONAL, preScoreboardContent)
+            .orElse(mockMatchProvider());
+    Match germanyMatch =
+        getSpecificMatch(Team.GERMANY_NATIONAL, Team.FRANCE_NATIONAL, preScoreboardContent)
+            .orElse(mockMatchProvider());
+    Match spainMatch =
+        getSpecificMatch(Team.SPAIN_NATIONAL, Team.BRAZIL_NATIONAL, preScoreboardContent)
+            .orElse(mockMatchProvider());
+    Match mexicoMatch =
+        getSpecificMatch(Team.MEXICO_NATIONAL, Team.CANADA_NATIONAL, preScoreboardContent)
+            .orElse(mockMatchProvider());
 
     assertNotNull(argentinaMatch);
     assertNotNull(uruguayMatch);
@@ -336,15 +355,40 @@ public class ScoreboardTest {
     assertNotNull(mexicoMatch);
 
     // updates will be shuffled a bit to test if time of update affects the result
-    scoreboard.updateMatch(germanyMatch.updateScore(2, 2).orElse(mockMatchProvider()));
-    scoreboard.updateMatch(argentinaMatch.updateScore(3, 1).orElse(mockMatchProvider()));
-    scoreboard.updateMatch(mexicoMatch.updateScore(0, 5).orElse(mockMatchProvider()));
-    scoreboard.updateMatch(uruguayMatch.updateScore(6, 6).orElse(mockMatchProvider()));
-    scoreboard.updateMatch(spainMatch.updateScore(10, 2).orElse(mockMatchProvider()));
+    scoreboard.updateMatch(Optional.of(germanyMatch.updateScore(2, 2)).orElse(mockMatchProvider()));
+    scoreboard.updateMatch(Optional.of(argentinaMatch.updateScore(3, 1)).orElse(mockMatchProvider()));
+    scoreboard.updateMatch(Optional.of(mexicoMatch.updateScore(0, 5)).orElse(mockMatchProvider()));
+    scoreboard.updateMatch(Optional.of(uruguayMatch.updateScore(6, 6)).orElse(mockMatchProvider()));
+    scoreboard.updateMatch(Optional.of(spainMatch.updateScore(10, 2)).orElse(mockMatchProvider()));
     return scoreboard.getContent();
   }
 
-  private Optional<Match> getSpecificMatch(Team homeTeam, Team awayTeam, List<Match> scoreboardContent) {
-    return scoreboardContent.stream().filter(m->m.getHomeTeam().equals(homeTeam) && m.getAwayTeam().equals(awayTeam)).findFirst();
+  private Optional<Match> getSpecificMatch(
+      Team homeTeam, Team awayTeam, List<Match> scoreboardContent) {
+    return scoreboardContent.stream()
+        .filter(m -> m.getHomeTeam().equals(homeTeam) && m.getAwayTeam().equals(awayTeam))
+        .findFirst();
+  }
+
+  private void logScoreboard(String caller) {
+    List<Match> data = scoreboard.getContent();
+    log.info(String.format("=============================\n%s\n", caller));
+    data.forEach(
+        m ->
+            log.info(
+                String.format(
+                    "Match: %s-%s (%d:%d) started at %s",
+                    m.getHomeTeam(),
+                    m.getAwayTeam(),
+                    m.getScore().getHomeScore(),
+                    m.getScore().getAwayScore(),
+                    m.getArrivalIndex().toString())));
+    log.info("=============================");
+  }
+
+  private String getCallerMethodName() {
+    return StackWalker.getInstance()
+        .walk(stream -> stream.skip(1).findFirst().get())
+        .getMethodName();
   }
 }

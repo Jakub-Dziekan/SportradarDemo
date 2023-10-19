@@ -45,9 +45,8 @@ public final class Match {
   // This method is updating the score by creating the new match with old values and new score
   // NOTE: the arrival index is being copied, meaning that update is not changing the ordering in
   // the scoreboard
-  public Optional<Match> updateScore(int homeScore, int awayScore) {
-    return Optional.of(
-        createMatch(this.homeTeam, this.awayTeam, homeScore, awayScore, this.arrivalIndex));
+  public Match updateScore(int homeScore, int awayScore) {
+    return createMatch(this.homeTeam, this.awayTeam, homeScore, awayScore, this.arrivalIndex);
   }
 
   public int getScoreSum() {
