@@ -7,6 +7,7 @@ import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
 
 import java.util.List;
+import java.util.Optional;
 import java.util.stream.Stream;
 
 import static org.junit.jupiter.api.Assertions.*;
@@ -42,8 +43,7 @@ public class ScoreboardTest {
 
   @Test
   public void should_ReturnIdenticalScoreboard_When_AlreadyExistingMatchAdded_Test() {
-    scoreboardProvider();
-    List<Match> preScoreboardContent = scoreboard.getContent();
+    List<Match> preScoreboardContent = scoreboardProvider();
     Match match = scoreboard.startMatch(Team.SPAIN_NATIONAL, Team.BRAZIL_NATIONAL);
     assertNull(match, "Should not return an object. Duplicated match might have been created");
     List<Match> scoreboardContent = scoreboard.getContent();
@@ -54,8 +54,7 @@ public class ScoreboardTest {
 
   @Test
   public void should_ReturnIdenticalScoreboard_When_NullMatchRemoved_Test() {
-    scoreboardProvider();
-    List<Match> preScoreboardContent = scoreboard.getContent();
+    List<Match> preScoreboardContent = scoreboardProvider();
     List<Match> scoreboardContent;
 
     assertFalse(scoreboard.finishMatch(null));
@@ -65,8 +64,7 @@ public class ScoreboardTest {
 
   @Test
   public void should_ReturnIdenticalScoreboard_When_NullMatchUpdated_Test() {
-    scoreboardProvider();
-    List<Match> preScoreboardContent = scoreboard.getContent();
+    List<Match> preScoreboardContent = scoreboardProvider();
     List<Match> scoreboardContent;
 
     assertNull(scoreboard.updateMatch(null));
@@ -76,8 +74,7 @@ public class ScoreboardTest {
 
   @Test
   public void should_ReturnIdenticalScoreboard_When_MatchWithNullTeamsStarted_Test() {
-    scoreboardProvider();
-    List<Match> preScoreboardContent = scoreboard.getContent();
+    List<Match> preScoreboardContent = scoreboardProvider();
     List<Match> scoreboardContent;
 
     assertNull(scoreboard.startMatch(null, Team.ARGENTINA_NATIONAL));
@@ -88,9 +85,21 @@ public class ScoreboardTest {
   }
 
   @Test
+  public void should_ReturnIdenticalScoreboard_When_MatchWithNullTeamsUpdated_Test() {
+    List<Match> preScoreboardContent = scoreboardProvider();
+    List<Match> scoreboardContent;
+
+    assertNull(scoreboard.updateMatch(Match.createMatch(null, Team.ARGENTINA_NATIONAL)));
+    assertNull(scoreboard.updateMatch(Match.createMatch(null, null)));
+    assertNull(scoreboard.updateMatch(Match.createMatch(Team.URUGUAY_NATIONAL, null)));
+    assertNull(scoreboard.updateMatch(Match.createMatch(Team.URUGUAY_NATIONAL, null)));
+    scoreboardContent = scoreboard.getContent();
+    assertEquals(preScoreboardContent, scoreboardContent);
+  }
+
+  @Test
   public void should_ReturnIdenticalScoreboard_When_UpdatingNonExistingMatch_Test() {
-    scoreboardProvider();
-    List<Match> preScoreboardContent = scoreboard.getContent();
+    List<Match> preScoreboardContent = scoreboardProvider();
     List<Match> scoreboardContent;
 
     Match match = Match.createMatch(Team.CAMEROON_NATIONAL, Team.USA_NATIONAL);
@@ -102,8 +111,7 @@ public class ScoreboardTest {
 
   @Test
   public void should_ReturnIdenticalScoreboard_When_AlreadyFinishedMatchRemoved_Test() {
-    scoreboardProvider();
-    List<Match> preScoreboardContent = scoreboard.getContent();
+    List<Match> preScoreboardContent = scoreboardProvider();
     List<Match> extendedScoreboardContent;
     List<Match> scoreboardContent;
 
@@ -148,8 +156,7 @@ public class ScoreboardTest {
   @MethodSource("teamsProvider")
   public void should_ReturnAnUpdatedScoreboard_When_MatchIsAdded_Test(
       String homeTeam, String awayTeam) {
-    scoreboardProvider();
-    List<Match> preScoreboardContent = scoreboard.getContent();
+    List<Match> preScoreboardContent = scoreboardProvider();
     List<Match> extendedScoreboardContent;
 
     // adding a new match
@@ -177,8 +184,7 @@ public class ScoreboardTest {
 
   @Test
   public void should_ReturnAnUpdatedScoreboard_When_MatchIsFinished_Test() {
-    scoreboardProvider();
-    List<Match> preScoreboardContent = scoreboard.getContent();
+    List<Match> preScoreboardContent = scoreboardProvider();
     List<Match> shrunkScoreboardContent;
 
     // finishing an existing match, it should be the ARGENTINA match
@@ -197,8 +203,7 @@ public class ScoreboardTest {
 
   @Test
   public void should_ReturnAnUpdatedScoreboard_When_MatchIsUpdated_Test() {
-    scoreboardProvider();
-    List<Match> preScoreboardContent = scoreboard.getContent();
+    List<Match> preScoreboardContent = scoreboardProvider();
     List<Match> updatedScoreboardContent;
 
     // element of index 4 should be the Mexico-Canada match, as it was added first and all scores
@@ -217,7 +222,7 @@ public class ScoreboardTest {
     assertEquals(1, updatedMatch.getScore().getAwayScore());
 
     // the update should move the position of the match in the scoreboard to the top (index 0)
-    // without changing its size
+    // without changing the size of the scoreboard
     updatedScoreboardContent = scoreboard.getContent();
     assertNotNull(updatedScoreboardContent, "The scoreboard was null");
     assertEquals(preScoreboardContent.size(), updatedScoreboardContent.size());
@@ -234,31 +239,15 @@ public class ScoreboardTest {
     assertEquals(Team.SPAIN_NATIONAL, updatedScoreboardContent.get(4).getHomeTeam());
   }
 
-  // a similar case to the above ones, but everything combined
+  // a similar case to the above UPDATE one, but more complex
   // (we've already proven above that it works separately, so we'll only check the result)
   @Test
-  public void should_ReturnAnUpdatedScoreboard_When_MatchesAreAddedUpdatedAndFinished_Test() {
-    scoreboardProvider();
-    List<Match> preScoreboardContent = scoreboard.getContent();
+  public void should_ReturnAnUpdatedScoreboard_When_MatchesAreUpdated_Test() {
+    List<Match> preScoreboardContent = scoreboardProvider();
     List<Match> updatedScoreboardContent;
 
-    Match argentinaMatch = preScoreboardContent.get(0);
-    Match uruguayMatch = preScoreboardContent.get(1);
-    Match germanyMatch = preScoreboardContent.get(2);
-    Match spainMatch = preScoreboardContent.get(3);
-    Match mexicoMatch = preScoreboardContent.get(4);
-
-    // updates will be shuffled a bit to test if time of update affects the result
-    germanyMatch =
-        scoreboard.updateMatch(germanyMatch.updateScore(2, 2).orElse(mockMatchProvider()));
-    argentinaMatch =
-        scoreboard.updateMatch(argentinaMatch.updateScore(3, 1).orElse(mockMatchProvider()));
-    mexicoMatch = scoreboard.updateMatch(mexicoMatch.updateScore(0, 5).orElse(mockMatchProvider()));
-    uruguayMatch =
-        scoreboard.updateMatch(uruguayMatch.updateScore(6, 6).orElse(mockMatchProvider()));
-    spainMatch = scoreboard.updateMatch(spainMatch.updateScore(10, 2).orElse(mockMatchProvider()));
-
-    updatedScoreboardContent = scoreboard.getContent();
+    //updating scores
+    updatedScoreboardContent = scoreboardWithUpdatesProvider(preScoreboardContent);
     assertNotNull(updatedScoreboardContent, "The scoreboard was null");
     assertEquals(preScoreboardContent.size(), updatedScoreboardContent.size());
 
@@ -277,9 +266,19 @@ public class ScoreboardTest {
 
     assertEquals(Team.GERMANY_NATIONAL, updatedScoreboardContent.get(4).getHomeTeam());
     assertEquals(2, updatedScoreboardContent.get(4).getScore().getAwayScore());
+  }
+
+  // a similar case to the above ones, but everything combined
+  // (we've already proven above that it works separately, so we'll only check the result)
+  @Test
+  public void should_ReturnAnUpdatedScoreboard_When_MatchesAreAddedUpdatedAndFinished_Test() {
+    //adding matches and updating scores as above
+    List<Match> updatedScoreboardContent = scoreboardWithUpdatesProvider(scoreboardProvider());
 
     // let's now finish two games and add two more, the USA-CMR one will have equal goals count as
     // MEX-CAN
+    Match argentinaMatch = updatedScoreboardContent.get(3);
+    Match spainMatch = updatedScoreboardContent.get(1);
     assertTrue(scoreboard.finishMatch(argentinaMatch));
     assertTrue(scoreboard.finishMatch(spainMatch));
     Match newMatch = scoreboard.startMatch(Team.POLAND_NATIONAL, Team.SLOVENIA_NATIONAL);
@@ -307,30 +306,45 @@ public class ScoreboardTest {
         Arguments.of("CANADA_NATIONAL", "MEXICO_NATIONAL"));
   }
 
-  public Match mockMatchProvider() {
+  private Match mockMatchProvider() {
     return null;
   }
 
-  public void scoreboardProvider() {
-    Team homeTeam = Team.MEXICO_NATIONAL;
-    Team awayTeam = Team.CANADA_NATIONAL;
-    scoreboard.startMatch(homeTeam, awayTeam);
+  private List<Match> scoreboardProvider() {
+    scoreboard.startMatch(Team.MEXICO_NATIONAL, Team.CANADA_NATIONAL);
     // adding the same on purpose to make sure it won't be duplicated
-    homeTeam = Team.MEXICO_NATIONAL;
-    awayTeam = Team.CANADA_NATIONAL;
-    scoreboard.startMatch(homeTeam, awayTeam);
-    homeTeam = Team.SPAIN_NATIONAL;
-    awayTeam = Team.BRAZIL_NATIONAL;
-    scoreboard.startMatch(homeTeam, awayTeam);
-    homeTeam = Team.GERMANY_NATIONAL;
-    awayTeam = Team.FRANCE_NATIONAL;
-    scoreboard.startMatch(homeTeam, awayTeam);
-    homeTeam = Team.URUGUAY_NATIONAL;
-    awayTeam = Team.ITALY_NATIONAL;
-    scoreboard.startMatch(homeTeam, awayTeam);
-    homeTeam = Team.ARGENTINA_NATIONAL;
-    awayTeam = Team.AUSTRALIA_NATIONAL;
-    scoreboard.startMatch(homeTeam, awayTeam);
+    scoreboard.startMatch(Team.MEXICO_NATIONAL, Team.CANADA_NATIONAL);
+    scoreboard.startMatch(Team.SPAIN_NATIONAL, Team.BRAZIL_NATIONAL);
+    scoreboard.startMatch(Team.GERMANY_NATIONAL, Team.FRANCE_NATIONAL);
+    scoreboard.startMatch(Team.URUGUAY_NATIONAL, Team.ITALY_NATIONAL);
+    scoreboard.startMatch(Team.ARGENTINA_NATIONAL, Team.AUSTRALIA_NATIONAL);
     assertEquals(5, scoreboard.getContent().size(), "The scoreboard has unexpected size");
+    return scoreboard.getContent();
+  }
+
+  private List<Match> scoreboardWithUpdatesProvider(List<Match> preScoreboardContent) {
+    Match argentinaMatch = getSpecificMatch(Team.ARGENTINA_NATIONAL, Team.AUSTRALIA_NATIONAL, preScoreboardContent).orElse(mockMatchProvider());
+    Match uruguayMatch = getSpecificMatch(Team.URUGUAY_NATIONAL, Team.ITALY_NATIONAL, preScoreboardContent).orElse(mockMatchProvider());
+    Match germanyMatch = getSpecificMatch(Team.GERMANY_NATIONAL, Team.FRANCE_NATIONAL, preScoreboardContent).orElse(mockMatchProvider());
+    Match spainMatch = getSpecificMatch(Team.SPAIN_NATIONAL, Team.BRAZIL_NATIONAL, preScoreboardContent).orElse(mockMatchProvider());
+    Match mexicoMatch = getSpecificMatch(Team.MEXICO_NATIONAL, Team.CANADA_NATIONAL, preScoreboardContent).orElse(mockMatchProvider());
+
+    assertNotNull(argentinaMatch);
+    assertNotNull(uruguayMatch);
+    assertNotNull(germanyMatch);
+    assertNotNull(spainMatch);
+    assertNotNull(mexicoMatch);
+
+    // updates will be shuffled a bit to test if time of update affects the result
+    scoreboard.updateMatch(germanyMatch.updateScore(2, 2).orElse(mockMatchProvider()));
+    scoreboard.updateMatch(argentinaMatch.updateScore(3, 1).orElse(mockMatchProvider()));
+    scoreboard.updateMatch(mexicoMatch.updateScore(0, 5).orElse(mockMatchProvider()));
+    scoreboard.updateMatch(uruguayMatch.updateScore(6, 6).orElse(mockMatchProvider()));
+    scoreboard.updateMatch(spainMatch.updateScore(10, 2).orElse(mockMatchProvider()));
+    return scoreboard.getContent();
+  }
+
+  private Optional<Match> getSpecificMatch(Team homeTeam, Team awayTeam, List<Match> scoreboardContent) {
+    return scoreboardContent.stream().filter(m->m.getHomeTeam().equals(homeTeam) && m.getAwayTeam().equals(awayTeam)).findFirst();
   }
 }

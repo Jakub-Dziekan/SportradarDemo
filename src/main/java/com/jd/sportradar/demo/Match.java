@@ -27,6 +27,9 @@ public final class Match {
 
   static Match createMatch(
       Team homeTeam, Team awayTeam, int homeScore, int awayScore, BigInteger arrivalIndex) {
+    if (homeTeam == null || awayTeam == null) {
+      return null;
+    }
     return new Match(homeTeam, awayTeam, homeScore, awayScore, arrivalIndex);
   }
 

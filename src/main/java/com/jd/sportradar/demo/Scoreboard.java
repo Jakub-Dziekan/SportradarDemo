@@ -1,24 +1,33 @@
 package com.jd.sportradar.demo;
 
 import java.util.*;
+import java.util.function.Function;
 
 import static com.jd.sportradar.demo.Match.createMatch;
 
 public final class Scoreboard {
 
   Set<Match> scoreboardContent;
-  Comparator<Match> comparator =
+  List<Match> sortedOutput;
+  Comparator<Match> uniquenessComparator =
       Comparator.comparing(Match::getHomeTeam).thenComparing(Match::getAwayTeam);
 
+  Comparator<Match> outputComparator =
+      Comparator.comparing(Match::getScoreSum)
+          .thenComparing(Match::getArrivalIndex)
+          .reversed()
+          .thenComparing(Match::getHomeTeam)
+          .thenComparing(Match::getAwayTeam);
+
   public Scoreboard() {
-    scoreboardContent = new TreeSet<>(comparator);
+    scoreboardContent = new TreeSet<>(uniquenessComparator);
+    sortedOutput = new ArrayList<>();
   }
 
   public Match updateMatch(Match match) {
-    if (findAndRemove(match)) {
+    if (findAndRemove(match, false)) {
       Match newMatch = Match.createMatchFrom(match);
-      scoreboardContent.add(newMatch);
-      return newMatch;
+      return updateScoreboard(newMatch, true, m -> scoreboardContent.add(m)) ? newMatch : null;
     } else {
       return null;
     }
@@ -27,30 +36,38 @@ public final class Scoreboard {
   public Match startMatch(Team homeTeam, Team awayTeam) {
     if (homeTeam == null || awayTeam == null) return null;
     Match match = createMatch(homeTeam, awayTeam);
-    return scoreboardContent.add(match) ? match : null;
+    return updateScoreboard(match, true, m -> scoreboardContent.add(m)) ? match : null;
   }
 
-  private boolean findAndRemove(Match match) {
+  private boolean findAndRemove(Match match, Boolean shouldUpdateOutput) {
     if (null == match) return false;
-    return scoreboardContent.remove(match);
+    return updateScoreboard(match, shouldUpdateOutput, m -> scoreboardContent.remove(m));
   }
 
   public boolean finishMatch(Match match) {
-    return findAndRemove(match);
+    return findAndRemove(match, true);
   }
 
   public List<Match> getContent() {
-    return scoreboardContent.stream()
-        .sorted(
-            Comparator.comparing(Match::getScoreSum)
-                .thenComparing(Match::getArrivalIndex)
-                .reversed()
-                .thenComparing(Match::getHomeTeam)
-                .thenComparing(Match::getAwayTeam))
-        .toList();
+    return sortedOutput;
   }
 
   public void cleanUp() {
-    scoreboardContent = new TreeSet<>(comparator);
+    scoreboardContent = new TreeSet<>(uniquenessComparator);
+    sortedOutput = new ArrayList<>();
+  }
+
+  private void updateOutput() {
+    sortedOutput = scoreboardContent.stream().sorted(outputComparator).toList();
+  }
+
+  private boolean updateScoreboard(
+      Match match, Boolean shouldUpdateOutput, Function<Match, Boolean> operation) {
+    if (operation.apply(match)) {
+      if (shouldUpdateOutput) updateOutput();
+      return true;
+    } else {
+      return false;
+    }
   }
 }
