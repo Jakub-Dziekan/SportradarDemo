@@ -23,7 +23,7 @@ It is also assumed, that the library would (theoretically) be used in a write-ra
 This is why there's a tree (for uniqueness) and a list (for sorting). Two trees would probably be even more fun. One custom tree, overriding the Set methods and handling both even more than that, but we said that it should be kept simple.
 
 ### [A-7] Double sorting
-The output structure is being sorted twice in updateMatch - after Match removal and after adding the new one (Match is Immutable, so there's no real "update" of a MAtch). I have left it to keep the code easier to read. It could be removed though.
+<s>The output structure is being sorted twice in updateMatch - after Match removal and after adding the new one (Match is Immutable, so there's no real "update" of a MAtch). I have left it to keep the code easier to read. It could be removed though.</S> This has actually been adressed in one of the previous commits but stayed in the doc
 
 ### [A-8] Model assumptions
 It didn't seem reasonable to implement the solution as an interface without the knowledge of how it would be used (the Scoreboard seems more of a furniture for the decorator pattern and as such should probably be a class). Despite that I have provided a version with an interface contract. At least it makes the solutions more readable.
