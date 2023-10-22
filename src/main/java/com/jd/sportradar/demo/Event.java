@@ -9,11 +9,11 @@ public class Event {
   private static BigInteger arrivalIndexSequence = BigInteger.ZERO;
   private final BigInteger arrivalIndex;
 
-  public Event() {
-    this.arrivalIndex = arrivalIndexSequence = arrivalIndexSequence.add(BigInteger.ONE);
-  }
-
   public Event(BigInteger arrivalIndex) {
-    this.arrivalIndex = arrivalIndex;
+    if (BigInteger.ZERO.equals(arrivalIndex)) {
+      this.arrivalIndex = arrivalIndexSequence = arrivalIndexSequence.add(BigInteger.ONE);
+    } else {
+      this.arrivalIndex = arrivalIndex;
+    }
   }
 }

@@ -10,10 +10,7 @@ public final class Match extends Event {
   private final Score score;
 
   private Match(Team homeTeam, Team awayTeam, int homeScore, int awayScore) {
-    super();
-    this.homeTeam = homeTeam;
-    this.awayTeam = awayTeam;
-    this.score = new Score(homeScore, awayScore);
+    this(homeTeam, awayTeam, homeScore, awayScore, BigInteger.ZERO);
   }
 
   private Match(
